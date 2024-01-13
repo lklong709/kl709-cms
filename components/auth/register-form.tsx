@@ -4,6 +4,10 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RegisterSchema } from "@/schemas";
+import { useState, useTransition } from "react";
+
+import { register } from "@/actions/register";
+
 import { CardWrapper } from "@/components/auth/card-wrapper";
 import {
   Form,
@@ -15,23 +19,40 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { FormError } from "@/components/form-error";
+import { FormSuccess } from "@/components/form-success";
 
 export const LoginForm = () => {
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | undefined>("");
+  const [success, setSuccess] = useState<string | undefined>("");
+
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      password: "",
+      name: "abc",
+      email: "abc@xyz.com",
+      password: "123456",
     },
   });
 
-  const onSubmit = () => {};
+  const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
+    startTransition(() => {
+      setError("");
+      setSuccess("");
+      startTransition(() => {
+        register(values).then((data) => {
+          setError(data.error);
+          setSuccess(data.success);
+        });
+      });
+    });
+  };
 
   return (
     <CardWrapper
-      headerLabel="Welcome back"
-      backButtonLabel="Don't have an account?"
+      headerLabel="Create an account"
+      backButtonLabel="Already have an account?"
       backButtonHref="/auth/login"
       showSocial
     >
@@ -81,8 +102,10 @@ export const LoginForm = () => {
             </>
           </div>
           <Button type="submit" className="w-full">
-            Login
+            Register
           </Button>
+          <FormError message={error} />
+          <FormSuccess message={success} />
         </form>
       </Form>
     </CardWrapper>
