@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 export const LoginForm = () => {
   const searchParams = useSearchParams();
@@ -47,8 +48,8 @@ export const LoginForm = () => {
     setSuccess("");
     startTransition(() => {
       login(values).then((data) => {
-        setError(data.error);
-        setSuccess(data.success);
+        setError(data?.error);
+        setSuccess(data?.success);
       });
     });
   };
@@ -73,6 +74,7 @@ export const LoginForm = () => {
                     <FormControl>
                       <Input
                         disabled={isPending}
+                        type="email"
                         {...field}
                         placeholder="john.doe@example.com"
                       />
@@ -95,6 +97,14 @@ export const LoginForm = () => {
                         type="password"
                       />
                     </FormControl>
+                    <Button
+                      size="sm"
+                      variant="link"
+                      asChild
+                      className="px-0 font-normal"
+                    >
+                      <Link href="/auth/reset">Forgot password?</Link>
+                    </Button>
                     <FormMessage />
                   </FormItem>
                 )}

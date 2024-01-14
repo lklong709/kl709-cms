@@ -29,6 +29,14 @@ export const {
     },
   },
   callbacks: {
+    async signIn({ account, user }) {
+      if (account?.provider !== "credentials") return true;
+
+      const existingUser = await getUserById(user.id);
+      if (!existingUser?.emailVerified) return false;
+
+      return true;
+    },
     async jwt({ token }) {
       if (!token.sub) return token;
 

@@ -67,7 +67,11 @@ export const LoginForm = () => {
                   <FormItem>
                     <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="john.doe" />
+                      <Input
+                        disabled={isPending}
+                        {...field}
+                        placeholder="john.doe"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -80,7 +84,12 @@ export const LoginForm = () => {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="john.doe@example.com" />
+                      <Input
+                        disabled={isPending}
+                        type="email"
+                        {...field}
+                        placeholder="john.doe@example.com"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -93,7 +102,12 @@ export const LoginForm = () => {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="******" />
+                      <Input
+                        disabled={isPending}
+                        type="password"
+                        {...field}
+                        placeholder="******"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -101,7 +115,7 @@ export const LoginForm = () => {
               />
             </>
           </div>
-          <Button type="submit" className="w-full">
+          <Button disabled={isPending} type="submit" className="w-full">
             Register
           </Button>
           <FormError message={error} />
