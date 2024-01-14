@@ -30,9 +30,9 @@ export const LoginForm = () => {
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
-      name: "abc",
-      email: "abc@xyz.com",
-      password: "123456",
+      name: "",
+      email: "",
+      password: "",
     },
   });
 

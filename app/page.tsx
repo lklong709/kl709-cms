@@ -1,8 +1,12 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { Poppins } from "next/font/google";
 
 import { Button } from "@/components/ui/button";
 import { LoginButton } from "@/components/auth/login-button";
+import { currentUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 const font = Poppins({
   subsets: ["latin"],
@@ -10,6 +14,12 @@ const font = Poppins({
 });
 
 export default function Home() {
+  const user = currentUser();
+
+  if (!user) {
+    return redirect("/");
+  }
+
   return (
     <main className="flex h-full flex-col items-center justify-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-400 to-blue-800">
       <div className="space-y-6 text-center">
