@@ -8,5 +8,6 @@ export async function GET() {
   if (role === UserRole.ADMIN) {
     return new NextResponse(null, { status: 200 });
   }
+
   return new NextResponse(null, { status: 403 });
 }

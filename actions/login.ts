@@ -1,22 +1,25 @@
 "use server";
 
 import * as z from "zod";
-
-import { LoginSchema } from "@/schemas";
-import { signIn } from "@/auth";
-import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { AuthError } from "next-auth";
-import { getUserByEmail } from "@/data/user";
-import {
-  generateTwoFactorToken,
-  generateVerificationToken,
-} from "@/lib/tokens";
-import { sendTwoFactorTokenEmail, sendVerificationEmail } from "@/lib/mail";
-import { getTwoFactorTokenByEmail } from "@/data/two-factor-token";
+
 import { db } from "@/lib/db";
+import { signIn } from "@/auth";
+import { LoginSchema } from "@/schemas";
+import { getUserByEmail } from "@/data/user";
+import { getTwoFactorTokenByEmail } from "@/data/two-factor-token";
+import { sendVerificationEmail, sendTwoFactorTokenEmail } from "@/lib/mail";
+import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
+import {
+  generateVerificationToken,
+  generateTwoFactorToken,
+} from "@/lib/tokens";
 import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation";
 
-export const login = async (values: z.infer<typeof LoginSchema>) => {
+export const login = async (
+  values: z.infer<typeof LoginSchema>,
+  callbackUrl?: string | null
+) => {
   const validatedFields = LoginSchema.safeParse(values);
 
   if (!validatedFields.success) {
@@ -27,8 +30,8 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
 
   const existingUser = await getUserByEmail(email);
 
-  if (!existingUser || !existingUser?.email || !existingUser.password) {
-    return { error: "Email does not exist" };
+  if (!existingUser || !existingUser.email || !existingUser.password) {
+    return { error: "Email does not exist!" };
   }
 
   if (!existingUser.emailVerified) {
@@ -53,19 +56,17 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
       }
 
       if (twoFactorToken.token !== code) {
-        return { error: "Invalid code" };
+        return { error: "Invalid code!" };
       }
 
-      const hasExpires = new Date(twoFactorToken.expires) < new Date();
+      const hasExpired = new Date(twoFactorToken.expires) < new Date();
 
-      if (hasExpires) {
-        return { error: "Code expired" };
+      if (hasExpired) {
+        return { error: "Code expired!" };
       }
 
       await db.twoFactorToken.delete({
-        where: {
-          id: twoFactorToken.id,
-        },
+        where: { id: twoFactorToken.id },
       });
 
       const existingConfirmation = await getTwoFactorConfirmationByUserId(
@@ -74,9 +75,7 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
 
       if (existingConfirmation) {
         await db.twoFactorConfirmation.delete({
-          where: {
-            id: existingConfirmation.id,
-          },
+          where: { id: existingConfirmation.id },
         });
       }
 
@@ -87,7 +86,7 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
       });
     } else {
       const twoFactorToken = await generateTwoFactorToken(existingUser.email);
-      await sendTwoFactorTokenEmail(existingUser.email, twoFactorToken.token);
+      await sendTwoFactorTokenEmail(twoFactorToken.email, twoFactorToken.token);
 
       return { twoFactor: true };
     }
@@ -97,14 +96,13 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     await signIn("credentials", {
       email,
       password,
-      redirectTo: DEFAULT_LOGIN_REDIRECT,
+      redirectTo: callbackUrl || DEFAULT_LOGIN_REDIRECT,
     });
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":
           return { error: "Invalid credentials!" };
-
         default:
           return { error: "Something went wrong!" };
       }

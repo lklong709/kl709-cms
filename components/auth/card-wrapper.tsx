@@ -42,5 +42,3 @@ export const CardWrapper = ({
     </Card>
   );
 };
-
-export default CardWrapper;

@@ -2,12 +2,11 @@
 
 import * as z from "zod";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ResetSchema } from "@/schemas";
 import { useState, useTransition } from "react";
-import { reset } from "@/actions/reset";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import CardWrapper from "@/components/auth/card-wrapper";
+import { ResetSchema } from "@/schemas";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -16,10 +15,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { CardWrapper } from "@/components/auth/card-wrapper";
+import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
-import { Button } from "@/components/ui/button";
+import { reset } from "@/actions/reset";
 
 export const ResetForm = () => {
   const [error, setError] = useState<string | undefined>("");
@@ -39,8 +39,8 @@ export const ResetForm = () => {
 
     startTransition(() => {
       reset(values).then((data) => {
-        setError(data.error);
-        setSuccess(data.success);
+        setError(data?.error);
+        setSuccess(data?.success);
       });
     });
   };

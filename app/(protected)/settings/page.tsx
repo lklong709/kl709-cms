@@ -33,7 +33,7 @@ import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
 import { UserRole } from "@prisma/client";
 
-const SettingsPage = () => {
+export default function SettingsPage() {
   const user = useCurrentUser();
 
   const [error, setError] = useState<string | undefined>();
@@ -213,6 +213,4 @@ const SettingsPage = () => {
       </CardContent>
     </Card>
   );
-};
-
-export default SettingsPage;
+}

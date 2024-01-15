@@ -1,13 +1,15 @@
 "use server";
 
-import { getUserByEmail, getUserById } from "@/data/user";
-import { currentUser } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { sendVerificationEmail } from "@/lib/mail";
-import { generateVerificationToken } from "@/lib/tokens";
-import { SettingsSchema } from "@/schemas";
 import * as z from "zod";
 import bcrypt from "bcryptjs";
+
+import { update } from "@/auth";
+import { db } from "@/lib/db";
+import { SettingsSchema } from "@/schemas";
+import { getUserByEmail, getUserById } from "@/data/user";
+import { currentUser } from "@/lib/auth";
+import { generateVerificationToken } from "@/lib/tokens";
+import { sendVerificationEmail } from "@/lib/mail";
 
 export const settings = async (values: z.infer<typeof SettingsSchema>) => {
   const user = await currentUser();
@@ -37,7 +39,6 @@ export const settings = async (values: z.infer<typeof SettingsSchema>) => {
     }
 
     const verificationToken = await generateVerificationToken(values.email);
-
     await sendVerificationEmail(
       verificationToken.email,
       verificationToken.token
@@ -47,10 +48,13 @@ export const settings = async (values: z.infer<typeof SettingsSchema>) => {
   }
 
   if (values.password && values.newPassword && dbUser.password) {
-    const passwordsMatch = bcrypt.compare(values.password, dbUser.password);
+    const passwordsMatch = await bcrypt.compare(
+      values.password,
+      dbUser.password
+    );
 
     if (!passwordsMatch) {
-      return { error: "Incorrect Password!" };
+      return { error: "Incorrect password!" };
     }
 
     const hashedPassword = await bcrypt.hash(values.newPassword, 10);
@@ -58,12 +62,19 @@ export const settings = async (values: z.infer<typeof SettingsSchema>) => {
     values.newPassword = undefined;
   }
 
-  await db.user.update({
-    where: {
-      id: dbUser.id,
-    },
+  const updatedUser = await db.user.update({
+    where: { id: dbUser.id },
     data: {
       ...values,
+    },
+  });
+
+  update({
+    user: {
+      name: updatedUser.name,
+      email: updatedUser.email,
+      isTwoFactorEnabled: updatedUser.isTwoFactorEnabled,
+      role: updatedUser.role,
     },
   });
 
