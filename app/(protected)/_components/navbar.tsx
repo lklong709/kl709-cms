@@ -1,13 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { UserButton } from "@/components/auth/user-button";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { useEffect, useMemo } from "react";
 
 export const Navbar = () => {
   const pathname = usePathname();
+  const user = useCurrentUser();
+
+  useEffect(() => {
+    if (!user) {
+      return redirect("/auth/login");
+    }
+  }, [user]);
 
   return (
     <nav className="bg-secondary flex justify-between items-center p-4 rounded-xl w-[600px] shadow-sm">
