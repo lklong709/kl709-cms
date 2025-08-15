@@ -6,7 +6,7 @@ import { FormSuccess } from "@/components/form-success";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { WorkHoursMessage } from "@/components/work-hours-message";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/lib/types";
 import { toast } from "sonner";
 
 export default function AdminPage() {
